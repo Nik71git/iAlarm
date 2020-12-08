@@ -2240,10 +2240,10 @@
     {
         "id": "617ddfd5.c639a",
         "type": "ialarm-server",
-        "host": "192.168.1.6",
+        "host": "192.168.x.x",
         "port": "80",
-        "username": "nikatrd07",
-        "password": "xrvatrd07",
+        "username": "username",
+        "password": "password",
         "zones": "14"
     },
     {
@@ -2261,7 +2261,7 @@
         "id": "48645aaf.219f74",
         "type": "mqtt-broker",
         "name": "mosquitto",
-        "broker": "192.168.1.7",
+        "broker": "localhost",
         "port": "1883",
         "tls": "",
         "clientid": "",
