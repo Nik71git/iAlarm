@@ -1,0 +1,1654 @@
+[
+    {
+        "id": "63a96c8d.934874",
+        "type": "tab",
+        "label": "allarme casasicura",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e3b1081f.dd1268",
+        "type": "function",
+        "z": "63a96c8d.934874",
+        "name": "increment counter",
+        "func": "if ( (msg.i += 1) < msg.items.zones.length ) return msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 810,
+        "y": 520,
+        "wires": [
+            [
+                "e26b51d.6efcbb"
+            ]
+        ]
+    },
+    {
+        "id": "e26b51d.6efcbb",
+        "type": "function",
+        "z": "63a96c8d.934874",
+        "name": "for each zone",
+        "func": "if ( msg.i === undefined ) msg.i = 0;\nif ( msg.items === undefined ) msg.items = msg.payload;\n\n    msg.id = msg.items.zones[msg.i].id\n    msg.topic = 'home/alarm/zone' + msg.id + '/state';\n    msg.payload = JSON.stringify(msg.items.zones[msg.i]);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 420,
+        "wires": [
+            [
+                "e3b1081f.dd1268",
+                "b5583538.313998"
+            ]
+        ]
+    },
+    {
+        "id": "208ddf9b.139ac",
+        "type": "function",
+        "z": "63a96c8d.934874",
+        "name": "set enabled zones",
+        "func": "msg.enabled = [,1,2,3,4,5,6,7,8,9,10,11,12,13,14];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 570,
+        "y": 420,
+        "wires": [
+            [
+                "e26b51d.6efcbb"
+            ]
+        ]
+    },
+    {
+        "id": "b5583538.313998",
+        "type": "function",
+        "z": "63a96c8d.934874",
+        "name": "check enabled",
+        "func": "if (msg.enabled.includes(msg.id)) {\n    var memoryVal = global.get(msg.id.toString());\n    var newVal = msg.items.zones[msg.i].open;\n    node.warn(\"sensor \" + msg.id + ' OLD OPEN = ' + memoryVal + \" --> \" + 'NEW OPEN = ' + newVal);\n    if ( memoryVal != newVal ) {\n        global.set(msg.id.toString(), msg.items.zones[msg.i].open );\n        return msg;\n    }\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1020,
+        "y": 420,
+        "wires": [
+            [
+                "f693cfb5.ec9d4",
+                "8b411b5.56ee5e8",
+                "60cd72da.6a268c"
+            ]
+        ]
+    },
+    {
+        "id": "e7fa60e4.7786b",
+        "type": "ialarm status",
+        "z": "63a96c8d.934874",
+        "server": "617ddfd5.c639a",
+        "waitnames": true,
+        "x": 330,
+        "y": 340,
+        "wires": [
+            [
+                "d190b434.ef5518",
+                "208ddf9b.139ac"
+            ]
+        ]
+    },
+    {
+        "id": "5f7d561c.5ed7e8",
+        "type": "inject",
+        "z": "63a96c8d.934874",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 160,
+        "wires": [
+            [
+                "e7fa60e4.7786b",
+                "eae580a4.daee9"
+            ]
+        ]
+    },
+    {
+        "id": "eae580a4.daee9",
+        "type": "ialarm events",
+        "z": "63a96c8d.934874",
+        "server": "617ddfd5.c639a",
+        "x": 340,
+        "y": 160,
+        "wires": [
+            [
+                "fc4aee93.a87ac",
+                "c2e227a8.d7a3b8",
+                "80d6a57d.7c0f98"
+            ]
+        ]
+    },
+    {
+        "id": "fc4aee93.a87ac",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "Ultimo Evento Allarme",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "ultimo evento"
+            },
+            {
+                "property": "device_class",
+                "value": ""
+            },
+            {
+                "property": "icon",
+                "value": "mdi:security"
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload[0].message",
+        "stateType": "msg",
+        "attributes": [
+            {
+                "property": "Sensore",
+                "value": "payload[0].name",
+                "valueType": "msg"
+            },
+            {
+                "property": "Data",
+                "value": "payload[0].date",
+                "valueType": "msg"
+            },
+            {
+                "property": "Messaggio",
+                "value": "payload[0].message",
+                "valueType": "msg"
+            }
+        ],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 960,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c2e227a8.d7a3b8",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "Penultimo Evento Allarme",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "penultimo evento"
+            },
+            {
+                "property": "device_class",
+                "value": ""
+            },
+            {
+                "property": "icon",
+                "value": "mdi:security"
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload[1].message",
+        "stateType": "msg",
+        "attributes": [
+            {
+                "property": "Sensore",
+                "value": "payload[1].name",
+                "valueType": "msg"
+            },
+            {
+                "property": "Data",
+                "value": "payload[1].date",
+                "valueType": "msg"
+            },
+            {
+                "property": "Messaggio",
+                "value": "payload[1].message",
+                "valueType": "msg"
+            }
+        ],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 970,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "80d6a57d.7c0f98",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "Terzultimo Evento Allarme",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "terzultimo evento"
+            },
+            {
+                "property": "device_class",
+                "value": ""
+            },
+            {
+                "property": "icon",
+                "value": "mdi:security"
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload[2].message",
+        "stateType": "msg",
+        "attributes": [
+            {
+                "property": "Sensore",
+                "value": "payload[2].name",
+                "valueType": "msg"
+            },
+            {
+                "property": "Data",
+                "value": "payload[2].date",
+                "valueType": "msg"
+            },
+            {
+                "property": "Messaggio",
+                "value": "payload[2].message",
+                "valueType": "msg"
+            }
+        ],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 970,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c898bd15.8fa53",
+        "type": "ialarm command",
+        "z": "63a96c8d.934874",
+        "server": "617ddfd5.c639a",
+        "x": 350,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d8e91921.756198",
+        "type": "mqtt in",
+        "z": "63a96c8d.934874",
+        "name": "",
+        "topic": "home/alarm/set",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "c851cc16.b7689",
+        "x": 100,
+        "y": 40,
+        "wires": [
+            [
+                "c898bd15.8fa53"
+            ]
+        ]
+    },
+    {
+        "id": "1319ba07.bd12b6",
+        "type": "mqtt out",
+        "z": "63a96c8d.934874",
+        "name": "",
+        "topic": "home/alarm/state",
+        "qos": "2",
+        "retain": "",
+        "broker": "c851cc16.b7689",
+        "x": 1030,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "d190b434.ef5518",
+        "type": "function",
+        "z": "63a96c8d.934874",
+        "name": "stato",
+        "func": "msg.payload = msg.payload.status;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 550,
+        "y": 340,
+        "wires": [
+            [
+                "11248da8.4aa132"
+            ]
+        ]
+    },
+    {
+        "id": "11248da8.4aa132",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "Report Status",
+        "rules": [
+            {
+                "t": "change",
+                "p": "payload",
+                "pt": "msg",
+                "from": "DISARMED",
+                "fromt": "str",
+                "to": "disarmed",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "payload",
+                "pt": "msg",
+                "from": "ARMED_AWAY",
+                "fromt": "str",
+                "to": "armed_away",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "payload",
+                "pt": "msg",
+                "from": "ARMED_HOME",
+                "fromt": "str",
+                "to": "armed_home",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 780,
+        "y": 340,
+        "wires": [
+            [
+                "1319ba07.bd12b6"
+            ]
+        ]
+    },
+    {
+        "id": "46d3ab0d.8911d4",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona1",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[0].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[0].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 40,
+        "wires": [
+            [
+                "6171786d.ab78d8"
+            ]
+        ]
+    },
+    {
+        "id": "6171786d.ab78d8",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "taverna1",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "taverna1"
+            },
+            {
+                "property": "device_class",
+                "value": "window"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1780,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1c20c277.e7e4ee",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona2",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[1].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[1].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 100,
+        "wires": [
+            [
+                "4138c679.914cc8"
+            ]
+        ]
+    },
+    {
+        "id": "4138c679.914cc8",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "taverna2",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "taverna2"
+            },
+            {
+                "property": "device_class",
+                "value": "window"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1780,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b9956ad.f75f198",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona3",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[2].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[2].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 160,
+        "wires": [
+            [
+                "67d5005b.8196b"
+            ]
+        ]
+    },
+    {
+        "id": "67d5005b.8196b",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "lavanderia",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "lavanderia"
+            },
+            {
+                "property": "device_class",
+                "value": "door"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1790,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f9e63b2b.5ad188",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona4",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[3].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[3].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 220,
+        "wires": [
+            [
+                "d749c893.1e2fb8"
+            ]
+        ]
+    },
+    {
+        "id": "d749c893.1e2fb8",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "garage",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "garage"
+            },
+            {
+                "property": "device_class",
+                "value": "door"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1780,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2982cc0f.30ced4",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona5",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[4].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[4].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 280,
+        "wires": [
+            [
+                "d5f537a2.cd5538"
+            ]
+        ]
+    },
+    {
+        "id": "a173cabf.cfeec8",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona6",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[5].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[5].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 340,
+        "wires": [
+            [
+                "b0d33982.320578"
+            ]
+        ]
+    },
+    {
+        "id": "a5d75a5a.a65a18",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona7",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[6].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[6].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 400,
+        "wires": [
+            [
+                "8e93b5d7.dc7ed8"
+            ]
+        ]
+    },
+    {
+        "id": "d5f537a2.cd5538",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "cucina",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "cucina"
+            },
+            {
+                "property": "device_class",
+                "value": "door"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": false,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1770,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b0d33982.320578",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "salotto",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "salotto"
+            },
+            {
+                "property": "device_class",
+                "value": "door"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1770,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8e93b5d7.dc7ed8",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "camera Alice",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "camera Alice"
+            },
+            {
+                "property": "device_class",
+                "value": "window"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1790,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ee38d5a1.025508",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona8",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[7].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[7].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 460,
+        "wires": [
+            [
+                "de84437c.7fa28"
+            ]
+        ]
+    },
+    {
+        "id": "de84437c.7fa28",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "matrimoniale",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "matrimoniale"
+            },
+            {
+                "property": "device_class",
+                "value": "door"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1790,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3cfafe19.4fe652",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona9",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[8].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[8].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1590,
+        "y": 520,
+        "wires": [
+            [
+                "5ceaa57d.cbe7ac"
+            ]
+        ]
+    },
+    {
+        "id": "5ceaa57d.cbe7ac",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "bagno piccolo",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "bagno piccolo"
+            },
+            {
+                "property": "device_class",
+                "value": "window"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1800,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1dc0f8fc.836607",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona10",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[9].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[9].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1600,
+        "y": 580,
+        "wires": [
+            [
+                "884f9d93.43716"
+            ]
+        ]
+    },
+    {
+        "id": "884f9d93.43716",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "camera Matteo",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "camera Matteo"
+            },
+            {
+                "property": "device_class",
+                "value": "window"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1800,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "948f4c02.6c37c",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona11",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[10].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[10].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1600,
+        "y": 640,
+        "wires": [
+            [
+                "2b5c03d.e78a0fc"
+            ]
+        ]
+    },
+    {
+        "id": "2b5c03d.e78a0fc",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "bagno grande",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "bagno grande"
+            },
+            {
+                "property": "device_class",
+                "value": "window"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1800,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5324cb8a.e8f484",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona12",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[11].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[11].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1600,
+        "y": 700,
+        "wires": [
+            [
+                "ad9b33f8.6685f"
+            ]
+        ]
+    },
+    {
+        "id": "ad9b33f8.6685f",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "vano scale",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "vano scale"
+            },
+            {
+                "property": "device_class",
+                "value": "window"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1790,
+        "y": 700,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8e17fce1.c2dfc",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona13",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[12].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[12].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1600,
+        "y": 760,
+        "wires": [
+            [
+                "bca7b53e.9a2fc8"
+            ]
+        ]
+    },
+    {
+        "id": "bca7b53e.9a2fc8",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "ingresso",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "ingresso"
+            },
+            {
+                "property": "device_class",
+                "value": "motion"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1780,
+        "y": 760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "27375c2b.e6e1a4",
+        "type": "change",
+        "z": "63a96c8d.934874",
+        "name": "zona14",
+        "rules": [
+            {
+                "t": "change",
+                "p": "msg.items.zones[13].open",
+                "pt": "msg",
+                "from": "false",
+                "fromt": "bool",
+                "to": "off",
+                "tot": "str"
+            },
+            {
+                "t": "change",
+                "p": "msg.items.zones[13].open",
+                "pt": "msg",
+                "from": "true",
+                "fromt": "bool",
+                "to": "on",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1600,
+        "y": 820,
+        "wires": [
+            [
+                "b551d22.801ec3"
+            ]
+        ]
+    },
+    {
+        "id": "b551d22.801ec3",
+        "type": "ha-entity",
+        "z": "63a96c8d.934874",
+        "name": "sezionale",
+        "server": "2b77899a.ed9b86",
+        "version": 1,
+        "debugenabled": false,
+        "outputs": 1,
+        "entityType": "binary_sensor",
+        "config": [
+            {
+                "property": "name",
+                "value": "sezionale"
+            },
+            {
+                "property": "device_class",
+                "value": "garage_door"
+            },
+            {
+                "property": "icon",
+                "value": ""
+            },
+            {
+                "property": "unit_of_measurement",
+                "value": ""
+            }
+        ],
+        "state": "payload",
+        "stateType": "msg",
+        "attributes": [],
+        "resend": true,
+        "outputLocation": "",
+        "outputLocationType": "none",
+        "inputOverride": "allow",
+        "x": 1780,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f693cfb5.ec9d4",
+        "type": "function",
+        "z": "63a96c8d.934874",
+        "name": "",
+        "func": "xyz = JSON.parse(msg.payload);\n\nif ( xyz.id == 1) {\nnewMsg = {\nid: xyz.id,     \npayload: xyz.open}; \nreturn [newMsg,null,null,null,null,null,null,null,null,null,null,null,null,null]}\n\nelse if (xyz.id == 2 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open}; \nreturn [null,newMsg,null,null,null,null,null,null,null,null,null,null,null,null]}\n\nelse if (xyz.id == 3 ) {\nnewMsg = {\nid: xyz.id,     \npayload: xyz.open}; \nreturn [null,null,newMsg,null,null,null,null,null,null,null,null,null,null,null]}\n\nelse if (xyz.id == 4 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open}; \nreturn [null,null,null,newMsg,null,null,null,null,null,null,null,null,null,null]}\n\nelse if (xyz.id == 5 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,newMsg,null,null,null,null,null,null,null,null,null]}\n\nelse if (xyz.id == 6 ) {\nnewMsg = {\nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,newMsg,null,null,null,null,null,null,null,null]}\n\nelse if (xyz.id == 7 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,newMsg,null,null,null,null,null,null,null]}\n\nelse if (xyz.id == 8 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,null,newMsg,null,null,null,null,null]}\n\nelse if (xyz.id == 9 ) {\nnewMsg = {\nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,null,null,newMsg,null,null,null,null]}\n\nelse if (xyz.id == 10 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,null,null,null,newMsg,null,null,null,null]}\n\nelse if (xyz.id == 11 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,null,null,null,null,newMsg,null,null,null]}\n\nelse if (xyz.id == 12 ) {\nnewMsg = {\nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,null,null,null,null,null,newMsg,null,null]}\n\nelse if (xyz.id == 13 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,null,null,null,null,null,null,newMsg,null]}\n\nelse if (xyz.id == 14 ) {\nnewMsg = { \nid: xyz.id,     \npayload: xyz.open};    \nreturn [null,null,null,null,null,null,null,null,null,null,null,null,null,newMsg]}\n",
+        "outputs": 14,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1240,
+        "y": 420,
+        "wires": [
+            [
+                "46d3ab0d.8911d4"
+            ],
+            [
+                "1c20c277.e7e4ee"
+            ],
+            [
+                "b9956ad.f75f198"
+            ],
+            [
+                "f9e63b2b.5ad188"
+            ],
+            [
+                "2982cc0f.30ced4"
+            ],
+            [
+                "a173cabf.cfeec8"
+            ],
+            [
+                "a5d75a5a.a65a18"
+            ],
+            [
+                "ee38d5a1.025508"
+            ],
+            [
+                "3cfafe19.4fe652"
+            ],
+            [
+                "1dc0f8fc.836607"
+            ],
+            [
+                "948f4c02.6c37c"
+            ],
+            [
+                "5324cb8a.e8f484"
+            ],
+            [
+                "8e17fce1.c2dfc"
+            ],
+            [
+                "27375c2b.e6e1a4"
+            ]
+        ]
+    },
+    {
+        "id": "8b411b5.56ee5e8",
+        "type": "mqtt out",
+        "z": "63a96c8d.934874",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "broker": "c851cc16.b7689",
+        "x": 1260,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "60cd72da.6a268c",
+        "type": "debug",
+        "z": "63a96c8d.934874",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1280,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "617ddfd5.c639a",
+        "type": "ialarm-server",
+        "host": "",
+        "port": "80",
+        "username": "",
+        "password": "",
+        "zones": "14"
+    },
+    {
+        "id": "2b77899a.ed9b86",
+        "type": "server",
+        "name": "homeassistant",
+        "legacy": true,
+        "addon": true,
+        "rejectUnauthorizedCerts": true,
+        "ha_boolean": "y|yes|true|on|home|open",
+        "connectionDelay": true,
+        "cacheJson": true
+    },
+    {
+        "id": "c851cc16.b7689",
+        "type": "mqtt-broker",
+        "name": "mosquitto",
+        "broker": "core-mosquitto",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]
